@@ -48,17 +48,20 @@ async def PlanetInfo(interaction: discord.Interaction):
             total_planets = len(data)
             total_embed = discord.Embed(
                 title="Total Active Planets being fought:",
-                color=discord.Color.green()  
+                color=discord.Color.green() 
             )
             total_embed.add_field(name="Total Planets", value=total_planets, inline=False)
-            embeds.append(total_embed)
-
-            await interaction.response.send_message(embeds=embeds)
+            await interaction.response.send_message(embed=embeds[0])  # Sending the first embed
+            
+            for embed in embeds[1:]:  # Sending subsequent embeds in separate messages
+                await interaction.followup.send(embed=embed)
+                
+            await interaction.followup.send(embed=total_embed)  # Sending total planets info
         else:
             await interaction.response.send_message("No data available.")
     else:
         await interaction.response.send_message("Failed to fetch data from the API")
-
+        
 def get_color(percentage):
     if percentage > 55:
         return discord.Color.brand_green()
@@ -67,7 +70,7 @@ def get_color(percentage):
     else:
         return discord.Color.brand_red()
 
-@bot.tree.command(name="news", description="This commands shows 10 latest news from the ingame news feed from the HD2 API.") # kinda useless considering the HD2api doesn't update that page at all, but maybe I am just dumb
+@bot.tree.command(name="news", description="This commands shows 10 latest news from the ingame news feed from the HD2 API.")
 async def News(interaction: discord.Interaction):
     response = requests.get("https://helldiverstrainingmanual.com/api/v1/war/news")
     if response.status_code == 200:
